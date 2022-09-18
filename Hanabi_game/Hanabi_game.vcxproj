@@ -140,10 +140,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Player0403.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hanabi.h" />
-    <ClInclude Include="Player0000.h" />
+    <ClInclude Include="Player0403.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="HanabiLib.lib" />

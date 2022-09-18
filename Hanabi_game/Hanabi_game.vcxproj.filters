@@ -18,12 +18,15 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Player0403.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hanabi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Player0000.h">
+    <ClInclude Include="Player0403.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma comment(lib, "HanabiLib.lib")
 #include <vld.h>
 #include "Hanabi.h"
-#include "Player0000.h"
+#include "Player0403.h"
 #include <iostream>
 #include <map>
 
@@ -15,14 +15,14 @@ using namespace Hanabi;
  * @param view необходимый аргумент конструктора
  * @return указатель на новый динамический объект класса Player0000
 */
-PlayerAbstract* player0000(View view);
+PlayerAbstract* player0403(View view);
 
 const int GAMES_COUNT = 100;
 
 Log LOG{ Log::Level::Trace, std::cout }; // см. Hanabi::Log
 
 int main() {
-	PlayerFactory factories[PLAYERS_COUNT]{ player0000, player0000 };
+	PlayerFactory factories[PLAYERS_COUNT]{ player0403, player0403 };
 	std::map<int, int> results;
 	for (int gameI = 0; gameI < GAMES_COUNT; gameI++) {
 		results[game(factories, gameI, LOG)]++;
@@ -35,7 +35,7 @@ int main() {
 	return 0;
 }
 
-PlayerAbstract* player0000(View view) {
+PlayerAbstract* player0403(View view) {
 	// Замечание: можно передавать в конструктор ссылку/указатель на LOG, чтобы иметь возможность логирования с настройкой уровня.
-	return new Player0000(view);
+	return new Player0403(view, LOG);
 }
