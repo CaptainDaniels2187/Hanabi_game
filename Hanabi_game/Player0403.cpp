@@ -56,12 +56,37 @@ void Player0403::ConstructHand()
 
 bool Player0403::CanWePlay()
 {
+	for (auto const& card : hands[m_id])
+	{
+		if (playerView.canPlay(card))
+		{
+			return true;
+		}
+	}
 	return false;
 }
 
 bool Player0403::CanWePrompt()
 {
-	return true;
+	return playerView.promptTokens() > 0;
+}
+
+Action Player0403::Play()
+{
+	//TODO
+	return Action::Play(0);
+}
+
+Action Player0403::Prompt()
+{
+	//TODO
+	return Action::Prompt(1, Number::One);
+}
+
+Action Player0403::Discard()
+{
+	//TODO
+	return Action::Discard(0);
 }
 
 Action Player0403::decide()
@@ -80,6 +105,20 @@ Action Player0403::decide()
 		}
 	}
 
-
-	return Action(Action::Play(0));
+	//Выбор хода и вызов метода самого хода
+	if (CanWePlay())
+	{
+		return Play();
+	}
+	else
+	{
+		if (CanWePrompt())
+		{
+			return Prompt();
+		}
+		else
+		{
+			return Discard();
+		}
+	}
 }

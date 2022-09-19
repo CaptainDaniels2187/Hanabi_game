@@ -20,6 +20,11 @@ namespace Hanabi {
 		//Проверка условий игры для одного из ходов
 		bool CanWePlay();
 		bool CanWePrompt();
+
+		//Реализация ходов
+		Action Play();
+		Action Prompt();
+		Action Discard();
 	public:
 		//Конструктор объекта игрока с возможностью логирования для инициализации видимого стола для игрока и первоначальных данных о его руке
 		Player0403(View view, Log& log);
