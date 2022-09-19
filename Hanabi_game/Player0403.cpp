@@ -337,7 +337,7 @@ Action Player0403::Discard(Pile* hands)
 Action Player0403::decide()
 {
 	//¬ этой части мы формируем в пам€ти известные нам свои карты, а также карты других игроков
-	AllCards AllOtherCards;
+	AllCards AllOtherCards = {};
 	InitAllOtherCards(AllOtherCards);
 
 	m_myHandSize = playerView.myHandSize();

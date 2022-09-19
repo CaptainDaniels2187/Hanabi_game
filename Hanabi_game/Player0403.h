@@ -9,7 +9,7 @@ namespace Hanabi {
 
 	using StochasticMask = std::vector<double>;
 
-	using AllCards = size_t(*)[NUMBERS_COUNT];
+	using AllCards = size_t[COLORS_COUNT][NUMBERS_COUNT];
 
 	class Player0403 : public PlayerAbstract {
 		// Реализуйте необходимые методы абстрактного класса
