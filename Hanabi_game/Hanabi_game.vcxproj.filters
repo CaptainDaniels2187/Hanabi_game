@@ -23,10 +23,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Hanabi.h">
+    <ClInclude Include="Player0403.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Player0403.h">
+    <ClInclude Include="Hanabi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

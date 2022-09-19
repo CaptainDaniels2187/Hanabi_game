@@ -286,7 +286,7 @@ namespace Hanabi {
 		*/
 		const Pile& hand(Id playerId) const;
 		// количество карт в собственной руке (myId)
-		Index myHandSize() const;
+		size_t myHandSize() const;
 		// количество карт в колоде
 		size_t deckSize() const;
 		// стопка сброса

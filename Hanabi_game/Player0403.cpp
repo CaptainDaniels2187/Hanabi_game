@@ -1,5 +1,4 @@
 #include "Player0403.h"
-#include <algorithm>
 
 using namespace Hanabi;
 
@@ -39,7 +38,7 @@ void Player0403::ConstructHand(Pile& hand)
 			int n = std::min(ColoredPileMask[m_id][i].size(), NumericalPileMask[m_id][j].size());
 			for (int k = 0; k < n; ++k)
 			{
-				if (ColoredPileMask[m_id][i][k] == NumericalPileMask[m_id][j][k] && ColoredPileMask[m_id][i][k] == 1)
+				if (ColoredPileMask[m_id][i][k] == (NumericalPileMask[m_id][j][k] == 1))
 				{
 					hand[k] = Card(static_cast<Color>(i), static_cast<Number>(j + 1));
 				}
@@ -207,7 +206,7 @@ Action Player0403::Play(Pile* hands)
 		}
 		else
 		{
-			pUnknownCards(i, playableCards, pColorPlay, pNumPlay, pRandPlay);
+			pUnknownCards(i, playableCards, &Player0403::pColorPlay, &Player0403::pNumPlay, &Player0403::pRandPlay);
 		}
 	}
 
@@ -278,12 +277,35 @@ Action Player0403::Discard(Pile* hands)
 		}
 		else
 		{
-			pUnknownCards(i, ValuableMask, pColorVal, pNumVal, pRandVal);
+			pUnknownCards(i, ValuableMask, &Player0403::pColorVal, &Player0403::pNumVal, &Player0403::pRandVal);
 		}
 	}
 
+	//Поиск карты с наименьшей вероятностью полезности
+	double minProbability = ValuableMask[0];
+	Index minIt = 0;
+	for (int i = 1; i < m_myHandSize; ++i)
+	{
+		if (ValuableMask[i] < minProbability - dP)
+		{
+			minProbability = ValuableMask[i];
+			minIt = i;
+		}
+	}
 
-	return Action::Discard(0);
+	//Проверка на возможность нахождения сбрасываемой карты в колоде
+	if (minProbability > Half + dP)
+	{
+		//Проверка на возможность безопасно играть "на удачу"
+		if (playerView.mistakeTokens() > 1)
+		{
+			return Play(hands);
+		}
+	}
+
+	//TODO
+	//Вызов функции корректировки всех масок
+	return Action::Discard(minIt);
 }
 
 Action Player0403::decide()

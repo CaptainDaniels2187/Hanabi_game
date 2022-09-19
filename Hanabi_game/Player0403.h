@@ -3,7 +3,9 @@
 
 namespace Hanabi {
 
-	constexpr double dP = 0.01;
+	constexpr double dP = 0.001;
+
+	constexpr double Half = 0.5;
 
 	using StochasticMask = std::vector<double>;
 
