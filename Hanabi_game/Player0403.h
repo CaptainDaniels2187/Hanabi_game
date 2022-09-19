@@ -3,6 +3,8 @@
 
 namespace Hanabi {
 
+	constexpr double dP = 0.01;
+
 	using StochasticMask = std::vector<double>;
 
 	using AllCards = size_t(*)[NUMBERS_COUNT];
@@ -28,6 +30,18 @@ namespace Hanabi {
 		bool CanWePlay(Pile& hand);
 		bool CanWePrompt();
 
+		//Вычисление вероятностей ходов
+		double pColorPlay(int id, int col, int index);
+		double pNumPlay(int id, int num, int index);
+		double pRandPlay(int id, int none, int index);
+		double pColorVal(int id, int col, int index);
+		double pNumVal(int id, int val, int index);
+		double pRandVal(int id, int none, int index);
+
+		//Вспомогательный метод для подсчета вероятности (частично)неизвестной карты
+		void pUnknownCards(int index, StochasticMask& pMask, double(Player0403::* func1)(int, int, int), double(Player0403::* func2)(int, int, int),
+			double(Player0403::* func3)(int, int, int));
+
 		//Реализация ходов
 		Action Play(Pile* hands);
 		Action Prompt(Pile* hands);
@@ -35,9 +49,6 @@ namespace Hanabi {
 	public:
 		//Конструктор объекта игрока с возможностью логирования для инициализации видимого стола для игрока и первоначальных данных о его руке
 		Player0403(View view, Log& log);
-
-		//Перегрузка деструктора для корректного очищения полей класса Player0403
-		~Player0403();
 
 		//Реализация метода выбора правильного действия игроком
 		Action decide();

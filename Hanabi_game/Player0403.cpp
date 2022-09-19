@@ -7,10 +7,6 @@ Player0403::Player0403(View view, Log& log) : playerView(view), LOG(log), m_id(p
 {
 }
 
-Player0403::~Player0403()
-{
-}
-
 //Wrong realization!!!!!!!!!!!!!!!!!!!!!
 const char* Player0403::name() const
 {
@@ -68,7 +64,8 @@ void Player0403::CalculateOtherCards(Pile* hands, AllCards& allCards)
 	//Вычиатем известные карты в руках у игроков
 	for (int i = 0; i < PLAYERS_COUNT; ++i)
 	{
-		for (int j = 0; j < hands[i].size(); ++j)
+		int n = hands[i].size();
+		for (int j = 0; j < n; ++j)
 		{
 			if (hands[i][j] != Card())
 			{
@@ -116,9 +113,84 @@ bool Player0403::CanWePrompt()
 	return playerView.promptTokens() > 0;
 }
 
-Action Player0403::Play(Pile* hands)
+double Player0403::pColorPlay(int id, int col, int index)
 {
 	//TODO
+	//Вычисление вероятности для игры по цвету
+	return 0;
+}
+
+double Player0403::pNumPlay(int id, int num, int index)
+{
+	//TODO
+	//Вычисление вероятности для игры по числу
+	return 0;
+}
+
+double Player0403::pRandPlay(int id, int none, int index)
+{
+	//TODO
+	//Вычисление вероятности для игры рандомной карты
+	return 0;
+}
+
+double Player0403::pColorVal(int id, int col, int index)
+{
+	//TODO
+	//Вычисление вероятности полезности по цвету
+	return 0;
+}
+
+double Player0403::pNumVal(int id, int num, int index)
+{
+	//TODO
+	//Вычисление вероятности полезности по числу
+	return 0;
+}
+
+double Player0403::pRandVal(int id, int none, int index)
+{
+	//TODO
+	//Вычисление вероятности полезности для рандомной карты
+	return 0;
+}
+
+void Player0403::pUnknownCards(int index, StochasticMask& pMask, double(Player0403::* func1)(int, int, int), double(Player0403::* func2)(int, int, int),
+	double(Player0403::* func3)(int, int, int))
+{
+	bool isPrompt = false;
+	for (int j = 0; index < COLORS_COUNT; ++j)
+	{
+		if (index < ColoredPileMask[m_id][j].size())
+		{
+			if (ColoredPileMask[m_id][j][index])
+			{
+				isPrompt = true;
+				pMask[index] = (this->*func1)(m_id, j, index);
+				break;
+			}
+		}
+	}
+	for (int j = 0; j < NUMBERS_COUNT; ++j)
+	{
+		if (index < NumericalPileMask[m_id][j].size())
+		{
+			if (NumericalPileMask[m_id][j][index])
+			{
+				isPrompt = true;
+				pMask[index] = (this->*func2)(m_id, j, index);
+				break;
+			}
+		}
+	}
+	if (!isPrompt)
+	{
+		pMask[index] = (this->*func3)(m_id, 0, index);
+	}
+}
+
+Action Player0403::Play(Pile* hands)
+{
 	StochasticMask playableCards(m_myHandSize);
 	for (int i = 0; i < m_myHandSize; ++i)
 	{
@@ -135,39 +207,35 @@ Action Player0403::Play(Pile* hands)
 		}
 		else
 		{
-			bool isPrompt = false;
-			for (int j = 0; i < COLORS_COUNT; ++j)
+			pUnknownCards(i, playableCards, pColorPlay, pNumPlay, pRandPlay);
+		}
+	}
+
+	//Поиск карты наибольшей вероятной безошибочной игры, которая обладает наивысшим значением
+	double maxProbability = playableCards[0];
+	Number maxNum = hands[m_id][0].number;
+	Index maxIt = 0;
+	for (int i = 1; i < m_myHandSize; ++i)
+	{
+		if (playableCards[i] > maxProbability + dP)
+		{
+			maxProbability = playableCards[i];
+			maxNum = hands[m_id][i].number;
+			maxIt = i;
+		}
+		else
+		{
+			if ((playableCards[i] >= maxProbability - dP && playableCards[i] <= maxProbability + dP) && (hands[m_id][i].number > maxNum))
 			{
-				if (i < ColoredPileMask[m_id][j].size())
-				{
-					if (ColoredPileMask[m_id][j][i])
-					{
-						isPrompt = true;
-						//Вычисление вероятности по цвету
-						break;
-					}
-				}
-			}
-			for (int j = 0; j < NUMBERS_COUNT; ++j)
-			{
-				if (i < NumericalPileMask[m_id][j].size())
-				{
-					if (NumericalPileMask[m_id][j][i])
-					{
-						isPrompt = true;
-						//Вычисление вероятности по числу
-						break;
-					}
-				}
-			}
-			if (!isPrompt)
-			{
-				//Вычисление вероятности для рандомной карты
+				maxNum = hands[m_id][i].number;
+				maxIt = i;
 			}
 		}
 	}
-	//Поиск карты наибольшей вероятной безоштбочной игры, которая обладает наивысшим значением
-	return Action::Play(0);
+
+	//TODO
+	//Вызов функции корректировки всех масок
+	return Action::Play(maxIt);
 }
 
 Action Player0403::Prompt(Pile* hands)
@@ -179,6 +247,42 @@ Action Player0403::Prompt(Pile* hands)
 Action Player0403::Discard(Pile* hands)
 {
 	//TODO
+	StochasticMask ValuableMask(m_myHandSize);
+	for (int i = 0; i < m_myHandSize; ++i)
+	{
+		if (hands[m_id][i] != Card())
+		{
+			bool isTrash = false;
+			for (int j = 0; j < COLORS_COUNT; ++j)
+			{
+				int num = static_cast<int>(hands[m_id][i].number);
+				if (num <= playerView.firework(static_cast<Color>(i)))
+				{
+					isTrash = true;
+					ValuableMask[i] = 0;
+				}
+			}
+			for (int j = i; j < m_myHandSize; ++j)
+			{
+				if (hands[m_id][i] == hands[m_id][j])
+				{
+					isTrash = true;
+					ValuableMask[i] = 0;
+				}
+			}
+			if (!isTrash)
+			{
+				//TODO
+				//Вычисление вероятности полезности для известной карты
+			}
+		}
+		else
+		{
+			pUnknownCards(i, ValuableMask, pColorVal, pNumVal, pRandVal);
+		}
+	}
+
+
 	return Action::Discard(0);
 }
 
