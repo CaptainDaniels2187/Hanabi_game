@@ -29,6 +29,16 @@ void Player0403::receive(Id fromPlayerId, Number number, Mask mask)
 	NumericalPileMask[m_id][static_cast<int>(number) - 1] = mask;
 }
 
+void Player0403::beNotified(Id playerId, Action::Discard discard)
+{
+	CorrectMasks(playerId, discard.cardIndex);
+}
+
+void Player0403::beNotified(Id playerId, Action::Play play)
+{
+	CorrectMasks(playerId, play.cardIndex);
+}
+
 void Player0403::ConstructHand(Pile& hand)
 {
 	for (int i = 0; i < COLORS_COUNT; ++i)
@@ -112,50 +122,50 @@ bool Player0403::CanWePrompt()
 	return playerView.promptTokens() > 0;
 }
 
-double Player0403::pColorPlay(int id, int col, int index)
+double Player0403::pColorPlay(Id id, int col, Index index)
 {
 	//TODO
 	//Вычисление вероятности для игры по цвету
 	return 0;
 }
 
-double Player0403::pNumPlay(int id, int num, int index)
+double Player0403::pNumPlay(Id id, int num, Index index)
 {
 	//TODO
 	//Вычисление вероятности для игры по числу
 	return 0;
 }
 
-double Player0403::pRandPlay(int id, int none, int index)
+double Player0403::pRandPlay(Id id, int none, Index index)
 {
 	//TODO
 	//Вычисление вероятности для игры рандомной карты
 	return 0;
 }
 
-double Player0403::pColorVal(int id, int col, int index)
+double Player0403::pColorVal(Id id, int col, Index index)
 {
 	//TODO
 	//Вычисление вероятности полезности по цвету
 	return 0;
 }
 
-double Player0403::pNumVal(int id, int num, int index)
+double Player0403::pNumVal(Id id, int num, Index index)
 {
 	//TODO
 	//Вычисление вероятности полезности по числу
 	return 0;
 }
 
-double Player0403::pRandVal(int id, int none, int index)
+double Player0403::pRandVal(Id id, int none, Index index)
 {
 	//TODO
 	//Вычисление вероятности полезности для рандомной карты
 	return 0;
 }
 
-void Player0403::pUnknownCards(int index, StochasticMask& pMask, double(Player0403::* func1)(int, int, int), double(Player0403::* func2)(int, int, int),
-	double(Player0403::* func3)(int, int, int))
+void Player0403::pUnknownCards(Index index, StochasticMask& pMask, double(Player0403::* func1)(Id, int, Index), double(Player0403::* func2)(Id, int, Index),
+	double(Player0403::* func3)(Id, int, Index))
 {
 	bool isPrompt = false;
 	for (int j = 0; j < COLORS_COUNT; ++j)
@@ -185,6 +195,24 @@ void Player0403::pUnknownCards(int index, StochasticMask& pMask, double(Player04
 	if (!isPrompt)
 	{
 		pMask[index] = (this->*func3)(m_id, 0, index);
+	}
+}
+
+void Player0403::CorrectMasks(Id id, Index index)
+{
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		if (index < ColoredPileMask[id][i].size())
+		{
+			ColoredPileMask[id][i].erase(ColoredPileMask[id][i].begin() + index);
+		}
+	}
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		if (index < NumericalPileMask[id][i].size())
+		{
+			NumericalPileMask[id][i].erase(NumericalPileMask[id][i].begin() + index);
+		}
 	}
 }
 
@@ -232,8 +260,7 @@ Action Player0403::Play(Pile* hands)
 		}
 	}
 
-	//TODO
-	//Вызов функции корректировки всех масок
+	CorrectMasks(m_id, maxIt);
 	return Action::Play(maxIt);
 }
 
@@ -303,8 +330,7 @@ Action Player0403::Discard(Pile* hands)
 		}
 	}
 
-	//TODO
-	//Вызов функции корректировки всех масок
+	CorrectMasks(m_id, minIt);
 	return Action::Discard(minIt);
 }
 

@@ -33,16 +33,19 @@ namespace Hanabi {
 		bool CanWePrompt();
 
 		//Вычисление вероятностей ходов
-		double pColorPlay(int id, int col, int index);
-		double pNumPlay(int id, int num, int index);
-		double pRandPlay(int id, int none, int index);
-		double pColorVal(int id, int col, int index);
-		double pNumVal(int id, int val, int index);
-		double pRandVal(int id, int none, int index);
+		double pColorPlay(Id id, int col, Index index);
+		double pNumPlay(Id id, int num, Index index);
+		double pRandPlay(Id id, int none, Index index);
+		double pColorVal(Id id, int col, Index index);
+		double pNumVal(Id id, int val, Index index);
+		double pRandVal(Id id, int none, Index index);
 
 		//Вспомогательный метод для подсчета вероятности (частично)неизвестной карты
-		void pUnknownCards(int index, StochasticMask& pMask, double(Player0403::* func1)(int, int, int), double(Player0403::* func2)(int, int, int),
-			double(Player0403::* func3)(int, int, int));
+		void pUnknownCards(Index index, StochasticMask& pMask, double(Player0403::* func1)(Id, int, Index), double(Player0403::* func2)(Id, int, Index),
+			double(Player0403::* func3)(Id, int, Index));
+
+		//Корректировка масок после разыгровки/сброса карты
+		void CorrectMasks(Id id, Index index);
 
 		//Реализация ходов
 		Action Play(Pile* hands);
@@ -63,5 +66,9 @@ namespace Hanabi {
 
 		//Обработка получения подсказки типа "Число" от игрока fromPlayerId
 		void receive(Id fromPlayerId, Number number, Mask mask);
+
+		//Обработка максок другого игрока во время игры/сброса его карты
+		void beNotified(Id playerId, Action::Discard discard);
+		void beNotified(Id playerId, Action::Play play);
 	};
 }
