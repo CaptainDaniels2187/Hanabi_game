@@ -18,7 +18,7 @@ namespace Hanabi {
 		View playerView;
 		Log LOG;
 		Id m_id;
-		Index m_myHandSize;
+		size_t m_myHandSize;
 		Mask ColoredPileMask[PLAYERS_COUNT][COLORS_COUNT];
 		Mask NumericalPileMask[PLAYERS_COUNT][NUMBERS_COUNT];
 

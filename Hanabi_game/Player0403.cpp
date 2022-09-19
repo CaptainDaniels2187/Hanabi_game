@@ -158,7 +158,7 @@ void Player0403::pUnknownCards(int index, StochasticMask& pMask, double(Player04
 	double(Player0403::* func3)(int, int, int))
 {
 	bool isPrompt = false;
-	for (int j = 0; index < COLORS_COUNT; ++j)
+	for (int j = 0; j < COLORS_COUNT; ++j)
 	{
 		if (index < ColoredPileMask[m_id][j].size())
 		{
