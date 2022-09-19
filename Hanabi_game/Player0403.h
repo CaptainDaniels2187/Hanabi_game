@@ -10,21 +10,20 @@ namespace Hanabi {
 		Log LOG;
 		Id m_id;
 		Index m_myHandSize;
-		Pile hands[PLAYERS_COUNT];
 		Mask ColoredPileMask[PLAYERS_COUNT][COLORS_COUNT];
 		Mask NumericalPileMask[PLAYERS_COUNT][NUMBERS_COUNT];
 
 		//Формирование карт в руке исходя из подсказок
-		void ConstructHand();
+		void ConstructHand(Pile& hand);
 
 		//Проверка условий игры для одного из ходов
-		bool CanWePlay();
+		bool CanWePlay(Pile& hand);
 		bool CanWePrompt();
 
 		//Реализация ходов
-		Action Play();
-		Action Prompt();
-		Action Discard();
+		Action Play(Pile* hands);
+		Action Prompt(Pile* hands);
+		Action Discard(Pile* hands);
 	public:
 		//Конструктор объекта игрока с возможностью логирования для инициализации видимого стола для игрока и первоначальных данных о его руке
 		Player0403(View view, Log& log);
