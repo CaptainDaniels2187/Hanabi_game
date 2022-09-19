@@ -3,6 +3,7 @@
 #include "Hanabi.h"
 #include "Player0403.h"
 #include <iostream>
+#include <fstream>
 #include <map>
 
 using namespace Hanabi;
@@ -19,6 +20,7 @@ PlayerAbstract* player0403(View view);
 
 const int GAMES_COUNT = 100;
 
+std::ofstream fout("log.txt");
 Log LOG{ Log::Level::Trace, std::cout }; // см. Hanabi::Log
 
 int main() {
@@ -32,6 +34,7 @@ int main() {
 	for (auto const& res : results) {
 		std::cout << res.first << "\t" << res.second << '\n';
 	}
+	fout.close();
 	return 0;
 }
 

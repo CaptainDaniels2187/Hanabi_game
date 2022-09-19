@@ -8,10 +8,18 @@ namespace Hanabi {
 
 		View playerView;
 		Log LOG;
-		Mask ColoredPileMask[COLORS_COUNT];
-		Mask NumericalPileMask[NUMBERS_COUNT];
-		Mask ToDiscard;
-		Mask ToPlay;
+		Id m_id;
+		Index m_myHandSize;
+		Pile hands[PLAYERS_COUNT];
+		Mask ColoredPileMask[PLAYERS_COUNT][COLORS_COUNT];
+		Mask NumericalPileMask[PLAYERS_COUNT][NUMBERS_COUNT];
+
+		//Формирование карт в руке исходя из подсказок
+		void ConstructHand();
+
+		//Проверка условий игры для одного из ходов
+		bool CanWePlay();
+		bool CanWePrompt();
 	public:
 		//Конструктор объекта игрока с возможностью логирования для инициализации видимого стола для игрока и первоначальных данных о его руке
 		Player0403(View view, Log& log);
