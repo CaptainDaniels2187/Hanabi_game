@@ -40,14 +40,12 @@ void Player0403::ConstructHand(Pile& hand)
 	{
 		for (int j = 0; j < NUMBERS_COUNT; ++j)
 		{
-			for (int k = 0; k < m_myHandSize; ++k)
+			int n = std::min(ColoredPileMask[m_id][i].size(), NumericalPileMask[m_id][j].size());
+			for (int k = 0; k < n; ++k)
 			{
-				if (!ColoredPileMask[m_id][i].empty() && !NumericalPileMask[m_id][j].empty())
+				if (ColoredPileMask[m_id][i][k] == NumericalPileMask[m_id][j][k] && ColoredPileMask[m_id][i][k] == 1)
 				{
-					if (ColoredPileMask[m_id][i][k] == NumericalPileMask[m_id][j][k] == 1)
-					{
-						hand[k] = Card(static_cast<Color>(i), static_cast<Number>(j + 1));
-					}
+					hand[k] = Card(static_cast<Color>(i), static_cast<Number>(j + 1));
 				}
 			}
 		}
@@ -60,26 +58,7 @@ void Player0403::InitAllOtherCards(AllCards& allCards)
 	{
 		for (int j = 0; j < NUMBERS_COUNT; ++j)
 		{
-			switch (j)
-			{
-			case 0:
-				allCards[i][j] = 3;
-				break;
-			case 1:
-				allCards[i][j] = 2;
-				break;
-			case 2:
-				allCards[i][j] = 2;
-				break;
-			case 3:
-				allCards[i][j] = 2;
-				break;
-			case 4:
-				allCards[i][j] = 1;
-				break;
-			default:
-				break;
-			}
+			allCards[i][j] = CARDS_COUNT_BY_NUMBER[j];
 		}
 	}
 }
@@ -159,20 +138,26 @@ Action Player0403::Play(Pile* hands)
 			bool isPrompt = false;
 			for (int j = 0; i < COLORS_COUNT; ++j)
 			{
-				if (ColoredPileMask[m_id][j][i])
+				if (i < ColoredPileMask[m_id][j].size())
 				{
-					isPrompt = true;
-					//Вычисление вероятности по цвету
-					break;
+					if (ColoredPileMask[m_id][j][i])
+					{
+						isPrompt = true;
+						//Вычисление вероятности по цвету
+						break;
+					}
 				}
 			}
 			for (int j = 0; j < NUMBERS_COUNT; ++j)
 			{
-				if (NumericalPileMask[m_id][j][i])
+				if (i < NumericalPileMask[m_id][j].size())
 				{
-					isPrompt = true;
-					//Вычисление вероятности по числу
-					break;
+					if (NumericalPileMask[m_id][j][i])
+					{
+						isPrompt = true;
+						//Вычисление вероятности по числу
+						break;
+					}
 				}
 			}
 			if (!isPrompt)
