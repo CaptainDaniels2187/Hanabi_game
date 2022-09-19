@@ -2,6 +2,11 @@
 #include "Hanabi.h"
 
 namespace Hanabi {
+
+	using StochasticMask = std::vector<double>;
+
+	using AllCards = size_t(*)[NUMBERS_COUNT];
+
 	class Player0403 : public PlayerAbstract {
 		// Реализуйте необходимые методы абстрактного класса
 		// Доступные типы и функции объявлены в заголовочном файле Hanabi.h
@@ -13,8 +18,11 @@ namespace Hanabi {
 		Mask ColoredPileMask[PLAYERS_COUNT][COLORS_COUNT];
 		Mask NumericalPileMask[PLAYERS_COUNT][NUMBERS_COUNT];
 
+		void InitAllOtherCards(AllCards& allCards);
+
 		//Формирование карт в руке исходя из подсказок
 		void ConstructHand(Pile& hand);
+		void CalculateOtherCards(Pile* hands, AllCards& allCards);
 
 		//Проверка условий игры для одного из ходов
 		bool CanWePlay(Pile& hand);
