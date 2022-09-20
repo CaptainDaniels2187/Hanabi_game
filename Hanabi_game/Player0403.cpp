@@ -229,30 +229,98 @@ double Player0403::pRandPlay(Id id, int none, Index index)
 
 double Player0403::pColorVal(Id id, int col, Index index)
 {
-	//TODO
 	//¬ычисление веро€тности полезности по цвету
-	return 0;
+	StochasticMask pNuminCol(NUMBERS_COUNT);
+	int S = 0;
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		S += AllOtherCards[col][i];
+	}
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		pNuminCol[i] = AllOtherCards[col][i] / static_cast<double>(S);
+	}
+	int num = playerView.firework(static_cast<Color>(col));
+	double P = 0;
+	if (AllOtherCards[col][num] > 0)
+	{
+		for (int i = num; i < NUMBERS_COUNT; ++i)
+		{
+			P += pNuminCol[i];
+		}
+		return P;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 double Player0403::pNumVal(Id id, int num, Index index)
-{
-	//TODO
-	//¬ычисление веро€тности полезности по числу
-	return 0;
+{	//¬ычисление веро€тности полезности по числу
+	int S = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		S += AllOtherCards[i][num];
+	}
+
+	double P = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		int sz = playerView.firework(static_cast<Color>(i));
+		if (num >= sz)
+		{
+			if (sz < NUMBERS_COUNT)
+			{
+				if (AllOtherCards[i][sz] > 0)
+				{
+					P += AllOtherCards[i][num];
+				}
+			}
+		}
+	}
+	P /= static_cast<double>(S);
+	return P;
 }
 
 double Player0403::pRandVal(Id id, int none, Index index)
 {
-	//TODO
 	//¬ычисление веро€тности полезности дл€ рандомной карты
-	return 0;
+	int S = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		for (int j = 0; j < NUMBERS_COUNT; ++j)
+		{
+			S += AllOtherCards[i][j];
+		}
+	}
+
+	double P = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		int num = playerView.firework(static_cast<Color>(i));
+		if (num < NUMBERS_COUNT)
+		{
+			if (AllOtherCards[i][num] > 0)
+			{
+				for (int j = num; j < NUMBERS_COUNT; ++j)
+				{
+					P += AllOtherCards[i][j];
+				}
+			}
+		}
+	}
+	P /= static_cast<double>(S);
+	return P;
 }
 
 double Player0403::pExistCard(Id id, const Card& card)
 {
-	//TODO
 	//¬ычисление веро€тности полезности дл€ известной карты
-	return 0;
+	int col = static_cast<int>(card.color);
+	int num = static_cast<int>(card.number) - 1;
+
+	return pColorVal(id, col, 0) * pNumVal(id, num, 0);
 }
 
 void Player0403::pUnknownCards(Index index, StochasticMask& pMask, double(Player0403::* func1)(Id, int, Index), double(Player0403::* func2)(Id, int, Index),
