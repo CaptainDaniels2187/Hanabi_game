@@ -22,6 +22,8 @@ namespace Hanabi {
 		Mask ColoredPileMask[PLAYERS_COUNT][COLORS_COUNT];
 		Mask NumericalPileMask[PLAYERS_COUNT][NUMBERS_COUNT];
 
+		AllCards AllOtherCards;
+
 		double kColors[COLORS_COUNT];
 		double kNumbers[NUMBERS_COUNT];
 

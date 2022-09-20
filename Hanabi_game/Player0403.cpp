@@ -159,23 +159,72 @@ bool Player0403::CanWePrompt()
 
 double Player0403::pColorPlay(Id id, int col, Index index)
 {
-	//TODO
 	//Вычисление вероятности для игры по цвету
-	return 0;
+	StochasticMask pNuminCol(NUMBERS_COUNT);
+	int S = 0;
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		S += AllOtherCards[col][i];
+	}
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		pNuminCol[i] = AllOtherCards[col][i] / static_cast<double>(S);
+	}
+	int num = playerView.firework(static_cast<Color>(col));
+	if (num < NUMBERS_COUNT)
+	{
+		return pNuminCol[num];
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 double Player0403::pNumPlay(Id id, int num, Index index)
 {
-	//TODO
 	//Вычисление вероятности для игры по числу
-	return 0;
+	int S = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		S += AllOtherCards[i][num];
+	}
+
+	double P = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		if (num == playerView.firework(static_cast<Color>(i)))
+		{
+			P += AllOtherCards[i][num];
+		}
+	}
+	P /= static_cast<double>(S);
+	return P;
 }
 
 double Player0403::pRandPlay(Id id, int none, Index index)
 {
-	//TODO
 	//Вычисление вероятности для игры рандомной карты
-	return 0;
+	int S = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		for (int j = 0; j < NUMBERS_COUNT; ++j)
+		{
+			S += AllOtherCards[i][j];
+		}
+	}
+
+	double P = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		int num = playerView.firework(static_cast<Color>(i));
+		if (num < NUMBERS_COUNT)
+		{
+			P += AllOtherCards[i][num];
+		}
+	}
+	P /= static_cast<double>(S);
+	return P;
 }
 
 double Player0403::pColorVal(Id id, int col, Index index)
@@ -309,7 +358,6 @@ Action Player0403::Play(Pile* hands)
 Action Player0403::Prompt(Pile* hands, AllCards Unknown)
 {
 	//Примечание реализцаия только для двух игроков
-	//TODO
 	Id otherId = PLAYERS_COUNT - m_id - 1;
 	size_t otherHandSize = hands[otherId].size();
 	Pile otherHand(otherHandSize);
@@ -523,7 +571,6 @@ Action Player0403::Discard(Pile* hands)
 Action Player0403::decide()
 {
 	//В этой части мы формируем в памяти известные нам свои карты, а также карты других игроков
-	AllCards AllOtherCards = {};
 	InitAllOtherCards(AllOtherCards);
 
 	FormkValues();
