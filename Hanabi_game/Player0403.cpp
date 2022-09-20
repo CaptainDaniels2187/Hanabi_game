@@ -39,7 +39,7 @@ void Player0403::FormkValues()
 		CurFire.push_back(playerView.firework(static_cast<Color>(i)));
 	}
 	std::sort(CurFire.begin(), CurFire.end());
-	med = CurFire[(COLORS_COUNT / 2) + (COLORS_COUNT % 2)];
+	med = CurFire[COLORS_COUNT / 2];
 
 	for (int i = 0; i < NUMBERS_COUNT; ++i)
 	{
@@ -49,7 +49,7 @@ void Player0403::FormkValues()
 		}
 		else
 		{
-			kNumbers[i] = (5 - (i + 1 - med)) / 5.0;
+			kNumbers[i] = (5 - (i - med))  / 5.0;
 		}
 	}
 }
@@ -248,7 +248,7 @@ double Player0403::pColorVal(Id id, int col, Index index)
 		{
 			P += pNuminCol[i];
 		}
-		return P;
+		return P*kColors[col];
 	}
 	else
 	{
@@ -258,6 +258,8 @@ double Player0403::pColorVal(Id id, int col, Index index)
 
 double Player0403::pNumVal(Id id, int num, Index index)
 {	//¬ычисление веро€тности полезности по числу
+	if (num == 4)
+		return 1;
 	int S = 0;
 	for (int i = 0; i < COLORS_COUNT; ++i)
 	{
@@ -280,7 +282,7 @@ double Player0403::pNumVal(Id id, int num, Index index)
 		}
 	}
 	P /= static_cast<double>(S);
-	return P;
+	return P*kNumbers[num];
 }
 
 double Player0403::pRandVal(Id id, int none, Index index)
@@ -399,23 +401,13 @@ Action Player0403::Play(Pile* hands)
 
 	//ѕоиск карты наибольшей веро€тной безошибочной игры, котора€ обладает наивысшим значением
 	double maxProbability = playableCards[0];
-	Number maxNum = hands[m_id][0].number;
 	Index maxIt = 0;
 	for (int i = 1; i < m_myHandSize; ++i)
 	{
 		if (playableCards[i] > maxProbability + dP)
 		{
 			maxProbability = playableCards[i];
-			maxNum = hands[m_id][i].number;
 			maxIt = i;
-		}
-		else
-		{
-			if ((playableCards[i] >= maxProbability - dP && playableCards[i] <= maxProbability + dP) && (hands[m_id][i].number > maxNum))
-			{
-				maxNum = hands[m_id][i].number;
-				maxIt = i;
-			}
 		}
 	}
 
@@ -582,14 +574,11 @@ Action Player0403::Discard(Pile* hands)
 		if (hands[m_id][i] != Card())
 		{
 			bool isTrash = false;
-			for (int j = 0; j < COLORS_COUNT; ++j)
+			int num = static_cast<int>(hands[m_id][i].number);
+			if (num <= playerView.firework(hands[m_id][i].color))
 			{
-				int num = static_cast<int>(hands[m_id][i].number);
-				if (num <= playerView.firework(static_cast<Color>(i)))
-				{
-					isTrash = true;
-					ValuableMask[i] = 0;
-				}
+				isTrash = true;
+				ValuableMask[i] = 0;
 			}
 			for (int j = i; j < m_myHandSize; ++j)
 			{

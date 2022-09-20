@@ -21,7 +21,7 @@ PlayerAbstract* player0403(View view);
 const int GAMES_COUNT = 100;
 
 std::ofstream fout("log.txt");
-Log LOG{ Log::Level::Info, fout }; // см. Hanabi::Log
+Log LOG{ Log::Level::Debug, fout }; // см. Hanabi::Log
 
 int main() {
 	PlayerFactory factories[PLAYERS_COUNT]{ player0403, player0403 };
