@@ -83,7 +83,7 @@ void Player0403::ConstructHand(Id id, Pile& hand)
 			int n = std::min(ColoredPileMask[id][i].size(), NumericalPileMask[id][j].size());
 			for (int k = 0; k < n; ++k)
 			{
-				if (ColoredPileMask[id][i][k] == (NumericalPileMask[id][j][k] == 1))
+				if (ColoredPileMask[id][i][k] == NumericalPileMask[id][j][k] && NumericalPileMask[id][j][k] == 1)
 				{
 					hand[k] = Card(static_cast<Color>(i), static_cast<Number>(j + 1));
 				}
