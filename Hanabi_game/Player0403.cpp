@@ -1,12 +1,13 @@
 #include "Player0403.h"
+#include <algorithm>
 
 using namespace Hanabi;
 
-Player0403::Player0403(View view, Log& log) : playerView(view), LOG(log), m_id(playerView.myId()), m_myHandSize(0)
+Player0403::Player0403(View view, Log& log) : playerView(view), LOG(log), m_id(playerView.myId()), m_myHandSize(0), kColors(), kNumbers()
 {
 }
 
-//Wrong realization!!!!!!!!!!!!!!!!!!!!!
+//Примечание реализцаия только для двух игроков
 const char* Player0403::name() const
 {
 	if (playerView.myId())
@@ -16,6 +17,40 @@ const char* Player0403::name() const
 	else
 	{
 		return "Nastya";
+	}
+}
+
+void Player0403::FormkValues()
+{
+	int min = playerView.firework(static_cast<Color>(0));
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		kColors[i] = (5 - playerView.firework(static_cast<Color>(i))) / 5.0;
+		if (playerView.firework(static_cast<Color>(i)) < min)
+		{
+			min = playerView.firework(static_cast<Color>(i));
+		}
+	}
+
+	Index med = 0;
+	std::vector<int> CurFire(COLORS_COUNT);
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		CurFire.push_back(playerView.firework(static_cast<Color>(i)));
+	}
+	std::sort(CurFire.begin(), CurFire.end());
+	med = CurFire[(COLORS_COUNT / 2) + (COLORS_COUNT % 2)];
+
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		if (i < min)
+		{
+			kNumbers[i] = 0;
+		}
+		else
+		{
+			kNumbers[i] = (5 - (i + 1 - med)) / 5.0;
+		}
 	}
 }
 
@@ -39,16 +74,16 @@ void Player0403::beNotified(Id playerId, Action::Play play)
 	CorrectMasks(playerId, play.cardIndex);
 }
 
-void Player0403::ConstructHand(Pile& hand)
+void Player0403::ConstructHand(Id id, Pile& hand)
 {
 	for (int i = 0; i < COLORS_COUNT; ++i)
 	{
 		for (int j = 0; j < NUMBERS_COUNT; ++j)
 		{
-			int n = std::min(ColoredPileMask[m_id][i].size(), NumericalPileMask[m_id][j].size());
+			int n = std::min(ColoredPileMask[id][i].size(), NumericalPileMask[id][j].size());
 			for (int k = 0; k < n; ++k)
 			{
-				if (ColoredPileMask[m_id][i][k] == (NumericalPileMask[m_id][j][k] == 1))
+				if (ColoredPileMask[id][i][k] == (NumericalPileMask[id][j][k] == 1))
 				{
 					hand[k] = Card(static_cast<Color>(i), static_cast<Number>(j + 1));
 				}
@@ -164,6 +199,13 @@ double Player0403::pRandVal(Id id, int none, Index index)
 	return 0;
 }
 
+double Player0403::pExistCard(Id id, const Card& card)
+{
+	//TODO
+	//Вычисление вероятности полезности для известной карты
+	return 0;
+}
+
 void Player0403::pUnknownCards(Index index, StochasticMask& pMask, double(Player0403::* func1)(Id, int, Index), double(Player0403::* func2)(Id, int, Index),
 	double(Player0403::* func3)(Id, int, Index))
 {
@@ -264,15 +306,160 @@ Action Player0403::Play(Pile* hands)
 	return Action::Play(maxIt);
 }
 
-Action Player0403::Prompt(Pile* hands)
+Action Player0403::Prompt(Pile* hands, AllCards Unknown)
 {
+	//Примечание реализцаия только для двух игроков
 	//TODO
-	return Action::Prompt(PLAYERS_COUNT - m_id - 1, Number::One);
+	Id otherId = PLAYERS_COUNT - m_id - 1;
+	size_t otherHandSize = hands[otherId].size();
+	Pile otherHand(otherHandSize);
+
+	ConstructHand(otherId, otherHand);
+
+	for (int i = 0; i < otherHandSize; ++i)
+	{
+		if (hands[otherId][i] != otherHand[i])
+		{
+			int col = static_cast<int>(hands[otherId][i].color);
+			int num = static_cast<int>(hands[otherId][i].number) - 1;
+			Unknown[col][num] += 1;
+		}
+	}
+
+	int S = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		for (int j = 0; j < NUMBERS_COUNT; ++j)
+		{
+			S += Unknown[i][j];
+		}
+	}
+
+	StochasticMask pColors(COLORS_COUNT);
+	StochasticMask pNumbers(NUMBERS_COUNT);
+
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		for (int j = 0; j < NUMBERS_COUNT; ++j)
+		{
+			pColors[i] += Unknown[i][j];
+		}
+		pColors[i] /= static_cast<double>(S);
+	}
+
+	for (int j = 0; j < NUMBERS_COUNT; ++j)
+	{
+		for (int i = 0; i < COLORS_COUNT; ++i)
+		{
+			pNumbers[j] += Unknown[i][j];
+		}
+		pNumbers[j] /= static_cast<double>(S);
+	}
+
+	double maxIcol = 0;
+	int maxCol = 0;
+	for (int i = 0; i < COLORS_COUNT; ++i)
+	{
+		Mask newMask;
+		for (auto const& card : hands[otherId])
+		{
+			newMask.push_back(card.color == static_cast<Color>(i));
+		}
+		int minSize = std::min(ColoredPileMask[otherId][i].size(), newMask.size());
+		for (int j = 0; j < minSize; ++j)
+		{
+			newMask[j] = newMask[j] - ColoredPileMask[otherId][i][j];
+		}
+		double P = 1;
+		for (int j = 0; j < otherHandSize; ++j)
+		{
+			if (hands[otherId][j] == otherHand[j])
+			{
+				P *= 1.0;
+			}
+			else
+			{
+				if (newMask[j])
+				{
+					P *= pColors[i];
+				}
+				else
+				{
+					P *= 1 - pColors[i];
+				}
+			}
+		}
+		double I = -1*log2(P) * kColors[i];
+		if (I > maxIcol + dP)
+		{
+			maxIcol = I;
+			maxCol = i;
+		}
+	}
+
+	double maxInum = 0;
+	int maxNum = 0;
+	for (int i = 0; i < NUMBERS_COUNT; ++i)
+	{
+		Mask newMask;
+		for (auto const& card : hands[otherId])
+		{
+			newMask.push_back(card.number == static_cast<Number>(i + 1));
+		}
+		int minSize = std::min(NumericalPileMask[otherId][i].size(), newMask.size());
+		for (int j = 0; j < minSize; ++j)
+		{
+			newMask[j] = newMask[j] - NumericalPileMask[otherId][i][j];
+		}
+		double P = 1;
+		for (int j = 0; j < otherHandSize; ++j)
+		{
+			if (hands[otherId][j] == otherHand[j])
+			{
+				P *= 1.0;
+			}
+			else
+			{
+				if (newMask[j])
+				{
+					P *= pNumbers[i];
+				}
+				else
+				{
+					P *= 1 - pNumbers[i];
+				}
+			}
+		}
+		double I = -1 * log2(P) * kNumbers[i];
+		if (I > maxInum + dP)
+		{
+			maxInum = I;
+			maxNum = i;
+		}
+	}
+
+	if (maxIcol > maxInum + dP)
+	{
+		ColoredPileMask[otherId][maxCol].clear();
+		for (int i = 0; i < otherHandSize; ++i)
+		{
+			ColoredPileMask[otherId][maxCol].push_back(hands[otherId][i].color == static_cast<Color>(maxCol));
+		}
+		return Action::Prompt(otherId, static_cast<Color>(maxCol));
+	}
+	else
+	{
+		NumericalPileMask[otherId][maxNum].clear();
+		for (int i = 0; i < otherHandSize; ++i)
+		{
+			NumericalPileMask[otherId][maxNum].push_back(hands[otherId][i].number == static_cast<Number>(maxNum + 1));
+		}
+		return Action::Prompt(otherId, static_cast<Number>(maxNum + 1));
+	}
 }
 
 Action Player0403::Discard(Pile* hands)
 {
-	//TODO
 	StochasticMask ValuableMask(m_myHandSize);
 	for (int i = 0; i < m_myHandSize; ++i)
 	{
@@ -298,8 +485,7 @@ Action Player0403::Discard(Pile* hands)
 			}
 			if (!isTrash)
 			{
-				//TODO
-				//Вычисление вероятности полезности для известной карты
+				pExistCard(m_id, hands[m_id][i]);
 			}
 		}
 		else
@@ -340,12 +526,14 @@ Action Player0403::decide()
 	AllCards AllOtherCards = {};
 	InitAllOtherCards(AllOtherCards);
 
+	FormkValues();
+
 	m_myHandSize = playerView.myHandSize();
 
 	Pile Hands[PLAYERS_COUNT];
 	Hands[m_id] = Pile(m_myHandSize);
 
-	ConstructHand(Hands[m_id]);
+	ConstructHand(m_id, Hands[m_id]);
 	for (Id i = 0; i < PLAYERS_COUNT; ++i)
 	{
 		if (i != m_id)
@@ -364,7 +552,7 @@ Action Player0403::decide()
 	{
 		if (CanWePrompt())
 		{
-			return Prompt(Hands);
+			return Prompt(Hands, AllOtherCards);
 		}
 		else
 		{

@@ -22,10 +22,16 @@ namespace Hanabi {
 		Mask ColoredPileMask[PLAYERS_COUNT][COLORS_COUNT];
 		Mask NumericalPileMask[PLAYERS_COUNT][NUMBERS_COUNT];
 
+		double kColors[COLORS_COUNT];
+		double kNumbers[NUMBERS_COUNT];
+
+		//Формирование весовых коэффициентов для каждого цвета и числа
+		void FormkValues();
+
 		void InitAllOtherCards(AllCards& allCards);
 
 		//Формирование карт в руке исходя из подсказок
-		void ConstructHand(Pile& hand);
+		void ConstructHand(Id id, Pile& hand);
 		void CalculateOtherCards(Pile* hands, AllCards& allCards);
 
 		//Проверка условий игры для одного из ходов
@@ -39,6 +45,7 @@ namespace Hanabi {
 		double pColorVal(Id id, int col, Index index);
 		double pNumVal(Id id, int val, Index index);
 		double pRandVal(Id id, int none, Index index);
+		double pExistCard(Id id, const Card& card);
 
 		//Вспомогательный метод для подсчета вероятности (частично)неизвестной карты
 		void pUnknownCards(Index index, StochasticMask& pMask, double(Player0403::* func1)(Id, int, Index), double(Player0403::* func2)(Id, int, Index),
@@ -49,7 +56,7 @@ namespace Hanabi {
 
 		//Реализация ходов
 		Action Play(Pile* hands);
-		Action Prompt(Pile* hands);
+		Action Prompt(Pile* hands, AllCards Unknown);
 		Action Discard(Pile* hands);
 	public:
 		//Конструктор объекта игрока с возможностью логирования для инициализации видимого стола для игрока и первоначальных данных о его руке
